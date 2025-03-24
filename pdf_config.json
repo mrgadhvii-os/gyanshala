@@ -1,0 +1,23 @@
+{
+    "default": {
+        "dl": false
+    },
+    "pdfs": [
+        {
+            "title": "CBSE Class 9 Science 2023-24 Sample Paper",
+            "dl": true
+        },
+        {
+            "title": "CBSE Class 10 Science Term 2 Sample Paper",
+            "dl": false
+        },
+        {
+            "title": "CBSE Class 10 Science 2023-24 Sample Paper",
+            "dl": false
+        },
+        {
+            "title": "CBSE Class 10 Maths Sample Paper",
+            "dl": false
+        }
+    ]
+} 
