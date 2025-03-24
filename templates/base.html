@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}GyanShala - Your Learning Portal{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+        
+        body {
+            font-family: 'Gujarati Font';
+            padding-top: 10px;
+            padding-bottom: 20px;
+            background-color: #f8f9fa;
+            position: relative;
+        }
+
+        /* Gujarati Font Declarations */
+        @font-face {
+            font-family: 'Gujarati Font';
+            src: url('/static/fonts/NotoSansGujarati-Regula.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
+       
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        
+        /* Warning Banner Styles */
+        .warning-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--danger-color);
+            color: white;
+            text-align: center;
+            padding: 12px 20px;
+            z-index: 9999;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .warning-banner.show {
+            transform: translateY(0);
+        }
+        
+        .warning-message {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+        
+        .dismiss-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 0 0 20px;
+        }
+        
+        body.has-warning {
+            padding-top: 60px;
+        }
+        
+        /* Add a little space for all pages */
+        .content-container {
+            padding: 20px 0;
+        }
+    </style>
+    
+    {% block additional_head %}{% endblock %}
+</head>
+<body>
+    <!-- Warning Banner -->
+    <div id="warningBanner" class="warning-banner">
+        <span id="warningMessage" class="warning-message"></span>
+        <button class="dismiss-btn" onclick="dismissWarning()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Navigation Header -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 shadow-sm rounded">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('welcome') }}">
+                    <i class="fas fa-graduation-cap me-2"></i>GyanShala
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('welcome') }}">
+                                <i class="fas fa-home me-1"></i> Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('batch_content') }}">
+                                <i class="fas fa-book me-1"></i> Course
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="content-container">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-white">
+        <div class="container text-center">
+            <span class="text-muted">© 2024 GyanShala. All rights reserved.</span>
+        </div>
+    </footer>
+    
+    <!-- Security Overlay -->
+    <div id="devtools-overlay" class="warning-banner" style="transform: none; display: none; background-color: rgba(0, 0, 0, 0.95); height: 100vh; flex-direction: column; padding: 50px 20px;">
+        <div class="text-center">
+            <h4><i class="fas fa-exclamation-triangle me-2"></i> Security Alert</h4>
+            <p>Developer tools detected. This page has been locked for security reasons.</p>
+            <div class="spinner-border text-danger mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div id="lockdown-timer" class="fs-4 mb-3 text-danger">05:00</div>
+            <p>Please close developer tools and wait for the timer to complete.<br>Do not refresh the page or you will need to wait again.</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+    <!-- Warning Banner Functionality -->
+    <script>
+    // Initialize variables safely - convert Jinja to JS variables
+    (function() {
+        // Get the current path for path-specific security
+        var currentPath = window.location.pathname;
+        var isProtectedPage = currentPath.includes('/player/') || currentPath.includes('/batch_content');
+        
+        // Only initialize security on protected routes
+        if (!isProtectedPage) {
+            return;
+        }
+        
+        // Security variables
+        var devToolsOpened = false;
+        var lockdownActive = false;
+        var lockdownTimer = 300; // 5 minutes in seconds
+        var lockdownInterval;
+        var lockdownEndTime = 0; // Store the actual end time
+        
+        // DevTools detection methods
+        var securityMeasures = {
+            // Console protection
+            setupConsoleProtection: function() {
+                var protectedMethods = ['log', 'info', 'warn', 'error', 'debug', 'clear'];
+                var originalConsole = {};
+                
+                protectedMethods.forEach(function(method) {
+                    originalConsole[method] = console[method];
+                    console[method] = function() {
+                        if (method === 'clear') {
+                            securityMeasures.devToolsWarning("Console clearing detected");
+                        }
+                        return originalConsole[method].apply(console, arguments);
+                    };
+                });
+                
+                // Add warning
+                console.log("%cWARNING!", "color:red; font-size:60px; font-weight:bold;");
+                console.log("%cThis is a secure video player.", "color:red; font-size:20px;");
+                console.log("%cUsing developer tools is prohibited.", "color:red; font-size:16px;");
+            },
+            
+            // Window size check - use more reasonable thresholds to reduce false positives
+            checkResizeDevTools: function() {
+                var threshold = 200; // Increased threshold to reduce false positives
+                return Math.abs(window.outerHeight - window.innerHeight) > threshold ||
+                      Math.abs(window.outerWidth - window.innerWidth) > threshold;
+            },
+            
+            // Debugger detection
+            setupDebuggerDetection: function() {
+                setInterval(function() {
+                    var startTime = performance.now();
+                    debugger;
+                    var endTime = performance.now();
+                    if (endTime - startTime > 100) {
+                        securityMeasures.devToolsWarning("Debugger detected");
+                    }
+                }, 1000);
+            },
+            
+            // Function inspection detection
+            monitorFunctionCalls: function() {
+                var originalToString = Function.prototype.toString;
+                Function.prototype.toString = function() {
+                    securityMeasures.checkDevTools();
+                    return originalToString.apply(this, arguments);
+                };
+            },
+            
+            // DevTools orientation detection - use more reasonable thresholds
+            checkDevToolsOrientation: function() {
+                var widthThreshold = window.outerWidth - window.innerWidth > 250;  // Increased threshold
+                var heightThreshold = window.outerHeight - window.innerHeight > 250; // Increased threshold
+                return widthThreshold || heightThreshold;
+            },
+            
+            // Disable right-click
+            disableRightClick: function() {
+                document.addEventListener('contextmenu', function(e) {
+                    if (isProtectedPage) {
+                        e.preventDefault();
+                        securityMeasures.checkDevTools();
+                        return false;
+                    }
+                });
+            },
+            
+            // Periodic checks
+            startPeriodicChecks: function() {
+                setInterval(function() {
+                    securityMeasures.checkDevTools();
+                }, 1000);
+            },
+            
+            // Unified check method
+            checkDevTools: function() {
+                if (lockdownActive) return;
+                
+                if (this.checkResizeDevTools() || 
+                    this.checkDevToolsOrientation() || 
+                    (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)) {
+                    
+                    this.devToolsWarning("Developer tools detected");
+                }
+            },
+            
+            // Handle detection
+            devToolsWarning: function(reason) {
+                if (devToolsOpened || lockdownActive) return;
+                
+                console.warn("Security Alert: " + reason);
+                devToolsOpened = true;
+                
+                // Calculate end time for lockdown (5 minutes from now)
+                lockdownEndTime = Date.now() + (lockdownTimer * 1000);
+                
+                // Store in cookie only if on a protected path
+                if (isProtectedPage) {
+                    Cookies.set('lockdown_end_time', lockdownEndTime.toString(), { 
+                        expires: 1, // 1 day expiry
+                        secure: true,
+                        sameSite: 'strict',
+                        path: '/'
+                    });
+                }
+                
+                this.startLockdown();
+            },
+            
+            // Start lockdown
+            startLockdown: function() {
+                if (lockdownActive) return;
+                
+                lockdownActive = true;
+                var devtoolsOverlay = document.getElementById('devtools-overlay');
+                var lockdownTimerElement = document.getElementById('lockdown-timer');
+                
+                if (devtoolsOverlay) {
+                    devtoolsOverlay.style.display = 'flex';
+                    
+                    var player = document.getElementById('my-player');
+                    if (player) {
+                        player.pause();
+                        player.controls = false;
+                    }
+                    
+                    // Calculate remaining time based on end time
+                    var updateTimerDisplay = function() {
+                        var now = Date.now();
+                        var remainingMs = lockdownEndTime - now;
+                        
+                        if (remainingMs <= 0) {
+                            clearInterval(lockdownInterval);
+                            
+                            // Add additional 60 seconds penalty after completion
+                            var penaltyEndTime = Date.now() + 60000;
+                            Cookies.set('lockdown_end_time', penaltyEndTime.toString(), { 
+                                expires: 1,
+                                secure: true,
+                                sameSite: 'strict',
+                                path: '/'
+                            });
+                            
+                            // Redirect to a safe page
+                            location.href = "/batch_content";
+                            return;
+                        }
+                        
+                        // Update the countdown display
+                        if (lockdownTimerElement) {
+                            var remainingSeconds = Math.ceil(remainingMs / 1000);
+                            var minutes = Math.floor(remainingSeconds / 60);
+                            var seconds = remainingSeconds % 60;
+                            lockdownTimerElement.textContent = 
+                                minutes.toString().padStart(2, '0') + ':' + 
+                                seconds.toString().padStart(2, '0');
+                        }
+                    };
+                    
+                    // Initial update
+                    updateTimerDisplay();
+                    
+                    // Update every second
+                    lockdownInterval = setInterval(updateTimerDisplay, 1000);
+                }
+            },
+            
+            // Check previous violations
+            checkPreviousViolations: function() {
+                var storedEndTime = Cookies.get('lockdown_end_time');
+                
+                if (storedEndTime) {
+                    var endTime = parseInt(storedEndTime);
+                    var now = Date.now();
+                    
+                    if (endTime > now) {
+                        // Lockdown is still active
+                        lockdownEndTime = endTime;
+                        this.startLockdown();
+                        return true;
+                    } else {
+                        // Lockdown has expired, clear the cookie
+                        Cookies.remove('lockdown_end_time', { path: '/' });
+                    }
+                }
+                
+                return false;
+            },
+            
+            // Initialize
+            initialize: function() {
+                if (this.checkPreviousViolations()) {
+                    return;
+                }
+                
+                this.setupConsoleProtection();
+                this.setupDebuggerDetection();
+                this.monitorFunctionCalls();
+                this.disableRightClick();
+                this.startPeriodicChecks();
+                
+                var debuggerCode = function() { debugger; };
+                setInterval(debuggerCode, 100);
+            }
+        };
+        
+        // Initialize security measures
+        securityMeasures.initialize();
+    })();
+    
+    // Warning banner function
+    window.showWarning = function(message) {
+        var warningBanner = document.getElementById('warning-banner');
+        var warningMessage = document.getElementById('warning-message');
+        
+        if (warningBanner && warningMessage) {
+            warningMessage.textContent = message;
+            warningBanner.style.display = 'block';
+        }
+    };
+    </script>
+
+    {% block additional_scripts %}{% endblock %}
+</body>
+</html> 

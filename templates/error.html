@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Error - GyanShala{% endblock %}
+
+{% block additional_head %}
+<style>
+    .error-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+        text-align: center;
+    }
+    
+    .error-icon {
+        font-size: 4rem;
+        color: #e74c3c;
+        margin-bottom: 1.5rem;
+    }
+    
+    .error-title {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: #2c3e50;
+    }
+    
+    .error-message {
+        font-size: 1.2rem;
+        color: #7f8c8d;
+        max-width: 600px;
+        margin-bottom: 2rem;
+    }
+    
+    .back-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container error-container">
+    <div class="error-icon">
+        <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <h1 class="error-title">Error Occurred</h1>
+    <p class="error-message">{{ error }}</p>
+    <div class="back-options">
+        <a href="{{ url_for('welcome') }}" class="btn btn-outline-primary">
+            <i class="fas fa-home me-2"></i> Go to Home
+        </a>
+        <a href="{{ url_for('batch_content') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-book me-2"></i> Go to Course
+        </a>
+        <button onclick="window.history.back()" class="btn btn-outline-dark">
+            <i class="fas fa-arrow-left me-2"></i> Go Back
+        </button>
+    </div>
+</div>
+{% endblock %} 

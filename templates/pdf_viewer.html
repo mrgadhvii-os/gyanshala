@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ pdf_title }} - GyanShala{% endblock %}
+
+{% block additional_head %}
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    .pdf-header {
+        background-color: #3a3a3a;
+        color: white;
+        padding: 10px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .pdf-title {
+        font-weight: 500;
+        margin: 0;
+        font-size: 1.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70%;
+    }
+    
+    .watermark-text {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        transform: none;
+        font-size: 24px;
+        color: rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        z-index: 1000;
+        white-space: nowrap;
+        user-select: none;
+        font-weight: 500;
+        opacity: 0.8;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+    }
+    
+    .pdf-container {
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+    }
+    
+    .pdf-controls {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .btn-back {
+        text-decoration: none;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 4px;
+        background-color: rgba(255,255,255,0.2);
+        transition: background-color 0.3s;
+    }
+    
+    .btn-back:hover {
+        background-color: rgba(255,255,255,0.3);
+        color: white;
+    }
+    
+    #pdf-viewer {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    @media (max-width: 768px) {
+        .pdf-title {
+            font-size: 1rem;
+            max-width: 50%;
+        }
+    }
+    
+    .error-message {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.95);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    
+    .error-content {
+        text-align: center;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+    }
+    
+    .error-content i {
+        font-size: 3rem;
+        color: #e74c3c;
+        margin-bottom: 1rem;
+    }
+    
+    .error-content h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .error-content p {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pdf-header">
+    <h1 class="pdf-title">{{ pdf_title }}</h1>
+    <div class="pdf-controls">
+        <a href="{{ url_for('batch_content') }}" class="btn-back">
+            <i class="fas fa-arrow-left me-2"></i> Back to Course
+        </a>
+    </div>
+</div>
+
+<div class="watermark-text">@MrGadhvii</div>
+
+<div class="pdf-container">
+    <!-- PDF viewer will be inserted by JavaScript -->
+    <div id="pdf-viewer"></div>
+    <div id="pdf-error" class="error-message" style="display: none;">
+        <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error Loading PDF</h3>
+            <p id="error-details">Unable to load the PDF. Please try again later.</p>
+            <button onclick="window.location.reload()" class="btn btn-primary mt-3">Retry</button>
+            <a href="{{ url_for('batch_content') }}" class="btn btn-secondary mt-3 ms-2">Back to Course</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const pdfViewer = document.getElementById('pdf-viewer');
+        const pdfError = document.getElementById('pdf-error');
+        const errorDetails = document.getElementById('error-details');
+        const pdfUrl = "{{ pdf_url }}";
+        const token = "{{ token }}";
+        const serverWarningMessage = "{{ warning_message|default('') }}";
+        
+        // Use the specified external PDF viewer
+        if (pdfUrl && pdfViewer) {
+            // Get PDF container
+            const pdfContainer = document.querySelector('.pdf-container');
+            
+            // Create external PDF viewer URL
+            const externalViewerUrl = "https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=" + 
+                                    encodeURIComponent(pdfUrl) + 
+                                    "&save_flag=1&is_encrypted=0&encryption_key=encryptedSecret&encryption_version=1&phone=NjM4dWRoMzgyOTE2MjAxOHhsc3JkMDM4Y3l5Z3Rramg5NDI2MTE3NDg4";
+            
+            console.log("Using external PDF viewer:", externalViewerUrl);
+            
+            // Remove existing PDF viewer
+            if (pdfViewer) {
+                pdfViewer.remove();
+            }
+            
+            // Create new iframe with external viewer
+            const newViewer = document.createElement('iframe');
+            newViewer.id = 'pdf-viewer';
+            newViewer.src = externalViewerUrl;
+            newViewer.style.width = '100%';
+            newViewer.style.height = '100%';
+            newViewer.style.border = 'none';
+            newViewer.allowFullscreen = true;
+            
+            // Add iframe before the error div
+            pdfContainer.insertBefore(newViewer, pdfError);
+        }
+        
+        if (serverWarningMessage) {
+            // If there's a warning message passed from the server, display it
+            showError(serverWarningMessage);
+        } else {
+            // Handle errors
+            fetch(pdfUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (!response.ok) {
+                        showError(`Error accessing PDF: ${response.status} ${response.statusText}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('PDF access error:', error);
+                    // Don't show error automatically as the iframe might still work
+                });
+        }
+        
+        // Function to show error message
+        function showError(message) {
+            if (pdfViewer) {
+                pdfViewer.style.display = 'none';
+            }
+            errorDetails.textContent = message;
+            pdfError.style.display = 'flex';
+            
+            // Also show the global warning banner if it exists
+            if (window.showWarning) {
+                window.showWarning(message);
+            }
+        }
+        
+        // Prevent right-click on page
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Prevent keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Prevent saving or printing
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'p')) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Prevent developer tools
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c'))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %} 

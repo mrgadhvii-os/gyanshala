@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+
+{% block title %}11th Chemistry GyanShala{% endblock %}
+
+{% block additional_head %}
+<style>
+    .course-header {
+        background: linear-gradient(135deg, #8e44ad, #3498db);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .course-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('https://images.unsplash.com/photo-1532094349884-543019a69b2f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.2;
+        z-index: 0;
+    }
+    
+    .course-header-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .course-title {
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .course-subtitle {
+        opacity: 0.9;
+        font-weight: 300;
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .chapter-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        margin-bottom: 30px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .chapter-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+    
+    .chapter-header {
+        background: linear-gradient(to right, #3498db, #4a90e2);
+        padding: 1.2rem;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    
+    .chapter-content {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+    
+    .chapter-card.active .chapter-content {
+        max-height: 5000px;
+    }
+    
+    .chapter-icon {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .toggle-icon {
+        transition: transform 0.3s;
+    }
+    
+    .chapter-card.active .toggle-icon {
+        transform: rotate(180deg);
+    }
+    
+    .material-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .material-item {
+        padding: 1rem 1.2rem;
+        border-bottom: 1px solid #f1f1f1;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .material-item:last-child {
+        border-bottom: none;
+    }
+    
+    .material-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .material-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #2c3e50;
+        flex: 1;
+    }
+    
+    .material-title i {
+        color: #3498db;
+        font-size: 1.1rem;
+    }
+    
+    .material-title span {
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .material-type {
+        background-color: #e9ecef;
+        color: #6c757d;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .btn-play {
+        color: #2ecc71;
+        margin-left: 10px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-play:hover {
+        transform: scale(1.2);
+    }
+    
+    .btn-view {
+        color: #3498db;
+        margin-left: 10px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-view:hover {
+        transform: scale(1.2);
+    }
+    
+    .btn-download {
+        color: #e74c3c;
+        margin-left: 10px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-download:hover {
+        transform: scale(1.2);
+    }
+    
+    .section-divider {
+        display: flex;
+        align-items: center;
+        margin: 2rem 0;
+    }
+    
+    .divider-line {
+        flex-grow: 1;
+        height: 1px;
+        background-color: #e9ecef;
+    }
+    
+    .divider-text {
+        padding: 0 15px;
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .material-count {
+        font-size: 0.8rem;
+        color: white;
+        background-color: rgba(255,255,255,0.2);
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 10px;
+    }
+    
+    .chapter-description {
+        padding: 15px;
+        background-color: #f8f9fa;
+        font-size: 0.9rem;
+        color: #6c757d;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .section-title {
+        padding: 10px 15px;
+        background-color: #f1f8fe;
+        color: #2980b9;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    @media (max-width: 768px) {
+        .course-title {
+            font-size: 1.8rem;
+        }
+        .course-subtitle {
+            font-size: 1rem;
+        }
+        .chapter-header {
+            font-size: 1rem;
+            padding: 1rem;
+        }
+    }
+    
+    /* Loading animation */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #3498db;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+    }
+    
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    
+    .loading-text {
+        font-size: 1.2rem;
+        color: #333;
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    /* PDF viewer modal styles */
+    .pdf-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+    
+    .pdf-modal-header {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        padding: 10px 20px;
+        box-sizing: border-box;
+    }
+    
+    .pdf-modal-close {
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+    
+    .pdf-modal-close:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .pdf-iframe-container {
+        width: 96%;
+        height: 90%;
+        position: relative;
+    }
+    
+    .pdf-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background-color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="d-flex flex-column align-items-center">
+        <div class="spinner"></div>
+        <div class="loading-text">Loading content...</div>
+    </div>
+</div>
+
+<div class="course-header">
+    <div class="container course-header-content text-center">
+        <h1 class="course-title">11th Chemistry GyanShala</h1>
+        <p class="course-subtitle">Comprehensive chemistry course for NEET and board exam preparation in Gujarati medium</p>
+    </div>
+</div>
+
+<div class="container">
+    {% for chapter_name, chapter_data in chapters.items() %}
+        <div class="card chapter-card">
+            <div class="chapter-header" onclick="toggleChapter(this)">
+                <div class="chapter-icon">
+                    <i class="fas fa-book"></i>
+                    {{ chapter_name }}
+                    <span class="material-count">
+                        {{ chapter_data.lectures|length + chapter_data.pdfs|length }} items
+                    </span>
+                </div>
+                <i class="fas fa-chevron-down toggle-icon"></i>
+            </div>
+            
+            <div class="chapter-content">
+                {% if chapter_data.lectures|length > 0 %}
+                <div class="section-title">
+                    <i class="fas fa-video me-2"></i> Video Lectures
+                </div>
+                <ul class="material-list">
+                    {% for lecture in chapter_data.lectures %}
+                        <li class="material-item">
+                            <div class="material-title">
+                                <i class="fas fa-play-circle"></i>
+                                <span>{{ lecture.title }}</span>
+                            </div>
+                            <div>
+                                <span class="material-type">Video</span>
+                                <a href="{{ url_for('player', video_id=lecture.video_id) }}" class="btn-play" title="Play Video">
+                                    <i class="fas fa-play-circle"></i>
+                                </a>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                
+                {% if chapter_data.pdfs|length > 0 %}
+                <div class="section-title">
+                    <i class="fas fa-file-pdf me-2"></i> PDF Materials
+                </div>
+                <ul class="material-list">
+                    {% for pdf in chapter_data.pdfs %}
+                        <li class="material-item">
+                            <div class="material-title">
+                                <i class="fas fa-file-pdf"></i>
+                                <span>{{ pdf.title }}</span>
+                            </div>
+                            <div class="material-actions">
+                                <div>
+                                    <span class="material-type">PDF</span>
+                                    <a href="javascript:void(0)" onclick="viewPdf('{{ pdf.url|b64encode }}', '{{ pdf.title }}')" class="btn-view me-2" title="View PDF">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- PDF Modal Viewer -->
+<div class="pdf-modal" id="pdfModal">
+    <div class="pdf-modal-header">
+        <div class="pdf-modal-close" onclick="closePdfViewer()">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+    <div class="pdf-iframe-container">
+        <iframe id="pdfIframe" class="pdf-iframe" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+    // Hide loading overlay when page is fully loaded
+    window.addEventListener('load', function() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        }
+    });
+
+    // Function to view PDF in an iframe modal
+    function viewPdf(pdfUrlBase64, title) {
+        // Show loading overlay when viewing PDF
+        showLoadingOverlay('Opening PDF...');
+        
+        try {
+            // Decode base64 URL
+            let pdfUrl = atob(pdfUrlBase64);
+            
+            // Clean the URL (remove trailing backslashes and spaces)
+            pdfUrl = pdfUrl.trim().replace(/\\+$/, '');
+            
+            console.log("Opening PDF URL:", pdfUrl);
+            
+            // Create external viewer URL with the PDF URL as parameter
+            const externalViewerUrl = "https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=" + 
+                                       encodeURIComponent(pdfUrl) + 
+                                       "&save_flag=1&is_encrypted=0&encryption_key=encryptedSecret" + 
+                                       "&encryption_version=1&phone=NjM4dWRoMzgyOTE2MjAxOHhsc3JkMDM4Y3l5Z3Rramg5NDI2MTE3NDg4";
+            
+            // Get the PDF iframe and set its source
+            const pdfIframe = document.getElementById('pdfIframe');
+            if (pdfIframe) {
+                pdfIframe.src = externalViewerUrl;
+            }
+            
+            // Show the PDF modal
+            const pdfModal = document.getElementById('pdfModal');
+            if (pdfModal) {
+                pdfModal.style.display = 'flex';
+            }
+            
+            // Hide loading overlay
+            hideLoadingOverlay();
+            
+            // Enable dev tools protection
+            enableDevToolsProtection();
+        } catch (error) {
+            // Hide loading overlay
+            hideLoadingOverlay();
+            
+            console.error('Error processing PDF URL:', error);
+            alert('Error opening PDF. Please try again.');
+        }
+    }
+    
+    // Helper function to show loading overlay
+    function showLoadingOverlay(message = 'Loading...') {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const loadingText = document.querySelector('.loading-text');
+        
+        if (loadingText) {
+            loadingText.textContent = message;
+        }
+        
+        if (loadingOverlay) {
+            loadingOverlay.style.opacity = '1';
+            loadingOverlay.style.display = 'flex';
+        }
+    }
+    
+    // Helper function to hide loading overlay
+    function hideLoadingOverlay() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    // Function to download PDF directly
+    function downloadPdf(pdfUrlBase64, title) {
+        fetch(`/api/get_pdf_url/${pdfUrlBase64}?title=${encodeURIComponent(title)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                
+                if (!data.can_download) {
+                    alert('Download is not permitted for this PDF.');
+                    return;
+                }
+                
+                // Create hidden anchor and click it to download
+                const a = document.createElement('a');
+                a.href = data.url;
+                a.download = data.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            })
+            .catch(error => {
+                console.error('Error downloading PDF:', error);
+                alert('Error downloading PDF. Please try again.');
+            });
+    }
+
+    // Toggle chapter expansion
+    function toggleChapter(header) {
+        const chapter = header.closest('.chapter-card');
+        chapter.classList.toggle('active');
+    }
+
+    // Initialize the page - open the first chapter by default
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstChapter = document.querySelector('.chapter-card');
+        if (firstChapter) {
+            firstChapter.classList.add('active');
+        }
+    });
+
+    // Function to close the PDF viewer
+    function closePdfViewer() {
+        const pdfModal = document.getElementById('pdfModal');
+        if (pdfModal) {
+            pdfModal.style.display = 'none';
+        }
+        
+        // Clear the iframe src
+        const pdfIframe = document.getElementById('pdfIframe');
+        if (pdfIframe) {
+            pdfIframe.src = 'about:blank';
+        }
+    }
+    
+    // Function to enable dev tools protection
+    function enableDevToolsProtection() {
+        // Detect devtools opening
+        const devToolsChecker = setInterval(() => {
+            const widthThreshold = window.outerWidth - window.innerWidth > 160;
+            const heightThreshold = window.outerHeight - window.innerHeight > 160;
+            
+            if (widthThreshold || heightThreshold || 
+                window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized || 
+                window.devtoolsDetector) {
+                
+                console.log("DevTools detected!");
+                alert("DevTools are not allowed while viewing protected content.");
+                closePdfViewer();
+                clearInterval(devToolsChecker);
+            }
+        }, 1000);
+        
+        // Add additional dev tools prevention
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            // Prevent common dev tools shortcuts
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j')) || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c'))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Add debugger spam to slow down dev tools
+        setInterval(function() {
+            debugger;
+        }, 100);
+    }
+</script>
+{% endblock %} 

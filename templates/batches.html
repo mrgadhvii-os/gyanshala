@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Batches - GyanShala{% endblock %}
+
+{% block additional_head %}
+<style>
+    .batch-header {
+        padding: 2rem 0;
+        background-color: #f8f9fa;
+        margin-bottom: 2rem;
+    }
+    .batch-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        margin-bottom: 30px;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .batch-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .batch-img-container {
+        height: 200px;
+        background: linear-gradient(135deg, #8e44ad, #3498db);
+        position: relative;
+        overflow: hidden;
+    }
+    .batch-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .badge-container {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+    .batch-card-body {
+        padding: 1.5rem;
+    }
+    .batch-title {
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: #2c3e50;
+    }
+    .batch-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+    .info-item {
+        display: flex;
+        align-items: center;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    .info-item i {
+        margin-right: 5px;
+        color: #3498db;
+    }
+    .btn-study {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        padding: 0.6rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-study:hover {
+        background: linear-gradient(135deg, #2980b9, #3498db);
+        transform: translateY(-2px);
+    }
+    .filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .filter-badge {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        border: 1px solid #e9ecef;
+    }
+    .filter-badge.active {
+        background-color: #e9ecef;
+        color: #495057;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="batch-header">
+    <div class="container">
+        <h1 class="mb-3">Available Batches</h1>
+        <div class="filters">
+            <span class="filter-badge active">12+</span>
+            <span class="filter-badge active">2025</span>
+            <span class="filter-badge active">NEET</span>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" placeholder="Search for All Batches" disabled>
+            <button class="btn btn-dark" type="button">Search</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <div class="card batch-card">
+                <div class="batch-img-container">
+                    <img src="https://img.youtube.com/vi/rhUoxoIK72E/maxresdefault.jpg " class="batch-img" alt="Aarambh Batch 11th GyanShala">
+                    <div class="badge-container">
+                        <span class="badge bg-warning text-dark">NEW</span>
+                    </div>
+                </div>
+                <div class="batch-card-body">
+                    <h3 class="batch-title">Aarambh Batch 11th GyanShala</h3>
+                    <div class="batch-info">
+                        <div class="info-item">
+                            <i class="fas fa-bullseye"></i> Target: NEET + Board
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-graduation-cap"></i> Class: 11+
+                        </div>
+                    </div>
+                    <a href="{{ url_for('batch_content') }}" class="btn btn-primary btn-study w-100">LET'S STUDY</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

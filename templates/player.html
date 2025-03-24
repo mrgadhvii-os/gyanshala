@@ -1,0 +1,818 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lecture_name }} - GyanShala{% endblock %}
+
+{% block additional_head %}
+<!-- Add Plyr.js and HLS.js -->
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+<style>
+    @font-face {
+        font-family: 'Babloo Bhai';
+        src: url('{{ url_for("static", filename="fonts/BablooBhai.ttf") }}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+    
+    body {
+        font-family: 'Babloo Bhai', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .player-container {
+        margin: 30px auto;
+        max-width: 900px;
+    }
+    
+    .lecture-title {
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+    
+    .lecture-info {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .back-btn {
+        margin-bottom: 20px;
+    }
+    
+    .video-container {
+        position: relative;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    #my-player {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+    }
+    
+    .video-loading {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        background: rgba(44, 62, 80, 0.8);
+        color: white;
+    }
+    
+    .video-loading .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+    
+    .video-loading p {
+        margin-top: 1rem;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
+    .quality-selector {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .quality-selector select {
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background-color: white;
+        font-size: 14px;
+        margin-left: 10px;
+        flex-grow: 0;
+    }
+    
+    .quality-selector label {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0;
+    }
+    
+    .error-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        z-index: 20;
+        padding: 20px;
+    }
+    
+    .error-overlay h4 {
+        margin-bottom: 15px;
+    }
+    
+    .error-overlay p {
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    /* Plyr customizations */
+    .plyr--full-ui input[type=range] {
+        color: #3498db;
+    }
+    
+    .plyr__control--overlaid {
+        background: rgba(52, 152, 219, 0.8);
+    }
+    
+    .plyr--video .plyr__control.plyr__tab-focus,
+    .plyr--video .plyr__control:hover,
+    .plyr--video .plyr__control[aria-expanded=true] {
+        background: #3498db;
+    }
+    
+    .plyr__control.plyr__tab-focus {
+        box-shadow: 0 0 0 5px rgba(52, 152, 219, 0.5);
+    }
+    
+    .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::before {
+        background: #3498db;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container player-container">
+    <div class="back-btn">
+        <a href="{{ url_for('batch_content') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i> Back to Course
+        </a>
+    </div>
+    
+    <h3 class="lecture-title">{{ lecture_name }}</h3>
+    
+    <div class="video-container">
+        <div id="video-loading" class="video-loading">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading video...</p>
+        </div>
+        
+        <div id="error-overlay" class="error-overlay">
+            <h4><i class="fas fa-exclamation-triangle me-2"></i> Video Playback Error</h4>
+            <p id="error-message">We're having trouble playing this video. Please try refreshing the page or try again later.</p>
+            <button id="retry-button" class="btn btn-primary">Refresh Page</button>
+        </div>
+        
+        <video id="my-player" playsinline controls></video>
+    </div>
+    
+    <div class="quality-selector">
+        <label for="quality-select"><i class="fas fa-cog me-1"></i> Video Quality:</label>
+        <select id="quality-select" class="form-select form-select-sm d-inline-block w-auto">
+            <option value="auto">Auto</option>
+            <option value="1080p">1080p HD</option>
+            <option value="720p">720p HD</option>
+            <option value="480p">480p</option>
+            <option value="360p">360p</option>
+            <option value="240p">240p</option>
+        </select>
+    </div>
+    
+    <div class="lecture-info">
+        <h5><i class="fas fa-info-circle me-2"></i>About this Lecture</h5>
+        <p>This lecture is part of the GyanShala Chemistry course. Please ensure you have a stable internet connection for uninterrupted viewing. The content is protected for educational use only.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<!-- Required libraries for HLS video playback -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.3.5/dist/hls.min.js"></script>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+
+<script>
+    // Safely get values from server
+    var videoId = "{{ video_id }}";
+    var authToken = "{{ token }}";
+    var warningMessage = "{{ warning_message|default('') }}";
+    
+    // Player initialization
+    document.addEventListener('DOMContentLoaded', function() {
+        // Display warning message if any
+        if (warningMessage && window.showWarning) {
+            window.showWarning(warningMessage);
+        }
+        
+        // Get elements
+        var video = document.getElementById('my-player');
+        var errorOverlay = document.getElementById('error-overlay');
+        var errorMessage = document.getElementById('error-message');
+        var loadingIndicator = document.getElementById('video-loading');
+        var qualitySelector = document.getElementById('quality-select');
+        
+        // Quality options with more descriptive labels
+        var qualityLevels = {
+            'auto': 'Auto (Recommended)',
+            '1080p': '1080p HD',
+            '720p': '720p HD',
+            '480p': '480p (Standard)',
+            '360p': '360p (Low)',
+            '240p': '240p (Minimum)'
+        };
+        
+        // Variables to track state
+        var currentQuality = 'auto';
+        var player;
+        var currentVideoUrl;
+        var availableQualities = []; // To track actually available qualities
+        
+        // Check for saved quality preference in localStorage
+        var savedQuality = localStorage.getItem('videoQuality-' + videoId);
+        if (savedQuality) {
+            currentQuality = savedQuality;
+            console.log('Loaded saved quality preference:', currentQuality);
+            // Update the quality selector to show the saved quality
+            if (qualitySelector && qualitySelector.querySelector('option[value="' + savedQuality + '"]')) {
+                qualitySelector.value = savedQuality;
+            }
+        }
+        
+        // Set up the quality selector change event
+        if (qualitySelector) {
+            qualitySelector.addEventListener('change', function() {
+                switchQuality(this.value);
+            });
+        }
+        
+        // Error display function
+        function showError(message) {
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+            
+            if (errorOverlay && errorMessage) {
+                errorMessage.textContent = message;
+                errorOverlay.style.display = 'flex';
+                
+                if (window.showWarning) {
+                    window.showWarning(message);
+                }
+            }
+        }
+        
+        // Parse available qualities from URL
+        function detectAvailableQualities(url) {
+            // Reset available qualities
+            availableQualities = ['auto'];
+            
+            // Check if URL contains quality information
+            if (url) {
+                // Extract quality from URL (e.g., ".../720p/master-...")
+                var qualityMatch = url.match(/\/(\d+p)\/master/);
+                if (qualityMatch && qualityMatch[1]) {
+                    var detectedQuality = qualityMatch[1];
+                    console.log('Detected quality in URL:', detectedQuality);
+                    
+                    // Add detected quality
+                    if (!availableQualities.includes(detectedQuality)) {
+                        availableQualities.push(detectedQuality);
+                    }
+                    
+                    // Add additional quality options - simplify to just show all common options
+                    // This allows user to try any quality, even if it might not be available
+                    if (!availableQualities.includes('1080p')) availableQualities.push('1080p');
+                    if (!availableQualities.includes('720p')) availableQualities.push('720p');
+                    if (!availableQualities.includes('480p')) availableQualities.push('480p');
+                    if (!availableQualities.includes('360p')) availableQualities.push('360p');
+                    if (!availableQualities.includes('240p')) availableQualities.push('240p');
+                }
+            }
+            
+            // Update quality selector with available qualities
+            updateQualitySelector();
+            return availableQualities;
+        }
+        
+        // Update the quality selector with available qualities
+        function updateQualitySelector() {
+            var qualitySelector = document.getElementById('quality-select');
+            if (qualitySelector) {
+                qualitySelector.innerHTML = '';
+                
+                availableQualities.forEach(function(quality) {
+                    if (qualityLevels[quality]) {
+                        var option = document.createElement('option');
+                        option.value = quality;
+                        option.text = qualityLevels[quality];
+                        qualitySelector.appendChild(option);
+                    }
+                });
+                
+                qualitySelector.value = currentQuality;
+            }
+        }
+        
+        // Quality switching function - use dedicated API endpoint
+        function switchQuality(newQuality) {
+            if (newQuality === currentQuality) {
+                console.log('Already using quality:', newQuality);
+                return;
+            }
+            
+            console.log('Attempting to switch quality from', currentQuality, 'to', newQuality);
+            
+            // Save quality preference to localStorage
+            localStorage.setItem('videoQuality-' + videoId, newQuality);
+            console.log('Saved quality preference:', newQuality);
+            
+            // Remember position and state
+            var currentTime = video.currentTime;
+            var wasPlaying = !video.paused;
+            
+            // Show loading
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'flex';
+            }
+            
+            // Hide any existing error overlay
+            if (errorOverlay) {
+                errorOverlay.style.display = 'none';
+            }
+            
+            // Use dedicated quality change API
+            var apiUrl = '/api/change_quality/' + videoId + '?token=' + authToken + '&quality=' + newQuality;
+            
+            console.log('Requesting quality change via API:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(function(response) {
+                    console.log('API response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('Network error: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    console.log('API response data:', data);
+                    
+                    if (data.error) {
+                        console.error('API returned error:', data.error);
+                        // Try using the current URL with the new quality
+                        if (currentVideoUrl) {
+                            var attemptUrl = currentVideoUrl.replace(/\/\d+p\//, '/' + newQuality + '/');
+                            console.log('Attempting to use modified URL:', attemptUrl);
+                            // Try loading with the modified URL
+                            loadVideoWithUrl(attemptUrl, newQuality, currentTime, wasPlaying);
+                        } else {
+                            showError('Error changing quality: ' + data.error);
+                        }
+                        return;
+                    }
+                    
+                    if (data.status !== 'success') {
+                        console.error('API returned unsuccessful status:', data.status);
+                        // Try fallback if possible
+                        if (currentVideoUrl) {
+                            var attemptUrl = currentVideoUrl.replace(/\/\d+p\//, '/' + newQuality + '/');
+                            console.log('Attempting to use fallback URL:', attemptUrl);
+                            loadVideoWithUrl(attemptUrl, newQuality, currentTime, wasPlaying);
+                        } else {
+                            showError('Error changing quality: Unsuccessful response');
+                        }
+                        return;
+                    }
+                    
+                    // Success! Use the URL from API
+                    var newUrl = data.url;
+                    console.log('New video URL from API:', newUrl);
+                    
+                    // Load the video with new URL
+                    loadVideoWithUrl(newUrl, newQuality, currentTime, wasPlaying);
+                })
+                .catch(function(error) {
+                    console.error('Quality change API error:', error);
+                    // Hide loading indicator
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    
+                    // Try to modify the current URL directly without requiring API
+                    if (currentVideoUrl) {
+                        try {
+                            var attemptUrl = currentVideoUrl.replace(/\/\d+p\//, '/' + newQuality + '/');
+                            console.log('API failed, attempting direct URL modification:', attemptUrl);
+                            // Try loading with the modified URL
+                            loadVideoWithUrl(attemptUrl, newQuality, currentTime, wasPlaying);
+                        } catch (e) {
+                            showError('Failed to change quality: ' + error.message);
+                        }
+                    } else {
+                        showError('Failed to change quality: ' + error.message);
+                    }
+                });
+        }
+        
+        // Helper function to load video with a specific URL
+        function loadVideoWithUrl(url, quality, currentTime, wasPlaying) {
+            console.log('Loading video with:', {
+                url: url,
+                quality: quality,
+                resumeAt: currentTime,
+                autoplay: wasPlaying
+            });
+            
+            // Hide any existing error overlay
+            if (errorOverlay) {
+                errorOverlay.style.display = 'none';
+            }
+            
+            if (!url) {
+                console.error('Invalid URL provided to loadVideoWithUrl');
+                showError('Invalid video URL');
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+                return;
+            }
+            
+            currentVideoUrl = url;
+            currentQuality = quality;
+            
+            // Update quality selector
+            var qualitySelector = document.getElementById('quality-select');
+            if (qualitySelector) {
+                qualitySelector.value = quality;
+            }
+            
+            // Clean up existing player if needed
+            if (player) {
+                try {
+                    console.log('Destroying previous player instance');
+                    player.destroy();
+                    player = null;
+                } catch (e) {
+                    console.warn('Error destroying previous player instance:', e);
+                }
+            }
+            
+            if (window.hls) {
+                try {
+                    console.log('Destroying previous HLS instance');
+                    window.hls.destroy();
+                    window.hls = null;
+                } catch (e) {
+                    console.warn('Error destroying previous HLS instance:', e);
+                }
+            }
+            
+            try {
+                // Create a new video element to avoid stale state issues
+                var oldVideo = document.getElementById('my-player');
+                var videoContainer = oldVideo.parentNode;
+                
+                // Create new video element with same attributes
+                var newVideo = document.createElement('video');
+                newVideo.id = 'my-player';
+                newVideo.className = oldVideo.className;
+                newVideo.playsInline = true;
+                newVideo.controls = true;
+                
+                // Replace old video with new one
+                videoContainer.replaceChild(newVideo, oldVideo);
+                video = newVideo;
+                
+                console.log('Video element recreated for clean state');
+                
+                // Update video source with HLS.js if supported
+                if (Hls.isSupported()) {
+                    console.log('Initializing HLS.js with URL:', url);
+                    var hls = new Hls({
+                        autoStartLoad: true,
+                        startLevel: -1, // Auto level selection
+                        maxBufferLength: 30,
+                        maxBufferSize: 30 * 1000 * 1000,
+                        debug: false,
+                        fragLoadingMaxRetry: 5,
+                        manifestLoadingMaxRetry: 5,
+                        levelLoadingMaxRetry: 5,
+                        fragLoadingRetryDelay: 1000,
+                        manifestLoadingRetryDelay: 1000,
+                        levelLoadingRetryDelay: 1000
+                    });
+                    window.hls = hls;
+                    
+                    // Add detailed error logging
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.warn('HLS error event:', event);
+                        console.warn('HLS error data:', data);
+                        
+                        if (data.fatal) {
+                            console.error('HLS FATAL error:', data.type, data.details);
+                            
+                            // Try to recover
+                            if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                                console.log('Attempting network error recovery');
+                                hls.startLoad();
+                            } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                                console.log('Attempting media error recovery');
+                                hls.recoverMediaError();
+                            }
+                            
+                            // If not auto quality, try auto as fallback
+                            if (currentQuality !== 'auto') {
+                                console.log('Switching to auto quality after error');
+                                showError('Error loading video with quality ' + currentQuality + '. Switching to Auto quality.');
+                                setTimeout(function() {
+                                    switchQuality('auto');
+                                }, 1000);
+                            } else {
+                                showError('Error loading video. Please try again later.');
+                            }
+                        }
+                    });
+                    
+                    // Add detailed event logging
+                    hls.on(Hls.Events.MANIFEST_LOADING, function() {
+                        console.log('HLS: Manifest loading');
+                    });
+                    
+                    hls.on(Hls.Events.MANIFEST_LOADED, function() {
+                        console.log('HLS: Manifest loaded');
+                    });
+                    
+                    // Handle successful manifest parsing
+                    hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+                        console.log('HLS: Manifest parsed', data);
+                        
+                        // Hide loading indicator
+                        if (loadingIndicator) {
+                            loadingIndicator.style.display = 'none';
+                        }
+                        
+                        // Ensure error overlay is hidden when manifest is parsed successfully
+                        if (errorOverlay) {
+                            errorOverlay.style.display = 'none';
+                        }
+                        
+                        // Initialize Plyr player after HLS is ready
+                        initializePlayer(currentTime, wasPlaying);
+                    });
+                    
+                    // Handle media attachment
+                    hls.on(Hls.Events.MEDIA_ATTACHED, function() {
+                        console.log('HLS: Media attached, loading source');
+                        hls.loadSource(url);
+                    });
+                    
+                    // Attach to the new video element
+                    hls.attachMedia(video);
+                } 
+                else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    console.log('Using native HLS support');
+                    video.src = url;
+                    video.addEventListener('loadedmetadata', function() {
+                        console.log('Video metadata loaded');
+                        
+                        // Hide loading indicator
+                        if (loadingIndicator) {
+                            loadingIndicator.style.display = 'none';
+                        }
+                        
+                        // Initialize Plyr after video is ready
+                        initializePlayer(currentTime, wasPlaying);
+                    });
+                    
+                    video.addEventListener('error', function(e) {
+                        console.error('Video error event:', e);
+                        showError('Error loading video. Please try again later.');
+                    });
+                    
+                    video.load();
+                } 
+                else {
+                    console.error('HLS not supported by this browser');
+                    showError('Your browser does not support HLS video.');
+                    
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                }
+            } catch (e) {
+                console.error('Error in loadVideoWithUrl:', e);
+                showError('Error loading video: ' + e.message);
+                
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
+            }
+        }
+        
+        // Function to initialize player with controls
+        function initializePlayer(currentTime, autoplay) {
+            console.log('Initializing player at time:', currentTime, 'autoplay:', autoplay);
+            
+            try {
+                player = new Plyr(video, {
+                    controls: [
+                        'play-large', 'play', 'progress', 'current-time', 
+                        'mute', 'volume', 'settings', 'fullscreen'
+                    ],
+                    settings: ['speed'],
+                    speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] },
+                    seekTime: 10
+                });
+                
+                player.on('ready', function() {
+                    console.log('Plyr ready event fired');
+                    
+                    // Set the current time first
+                    if (currentTime > 0) {
+                        console.log('Setting current time to:', currentTime);
+                        video.currentTime = currentTime;
+                    }
+                    
+                    // Try to play if it was playing before
+                    if (autoplay) {
+                        console.log('Attempting to autoplay');
+                        video.play().catch(function(error) {
+                            console.error('Autoplay prevented by browser:', error);
+                        });
+                    }
+                });
+                
+                player.on('error', function(event) {
+                    console.error('Plyr error:', event);
+                    showError('Error playing video.');
+                });
+                
+                // Save position periodically
+                setInterval(function() {
+                    if (!video.paused && !video.ended) {
+                        localStorage.setItem('videoTime-' + videoId, video.currentTime);
+                    }
+                }, 5000);
+                
+                console.log('Player initialized');
+            } catch (e) {
+                console.error('Error initializing player:', e);
+                showError('Error initializing player: ' + e.message);
+            }
+        }
+        
+        // Initialize player
+        try {
+            if (!video || typeof video.play !== 'function') {
+                showError('Your browser does not support HTML5 video.');
+                return;
+            }
+            
+            // Offline detection
+            window.addEventListener('offline', function() {
+                if (window.showWarning) {
+                    window.showWarning('You are offline. Video playback may be interrupted.');
+                }
+            });
+            
+            // Initial video loading
+            var initialApiUrl = '/api/get_video_url/' + videoId + '?token=' + authToken;
+            
+            // Add quality parameter if there's a saved preference that's not 'auto'
+            if (savedQuality && savedQuality !== 'auto') {
+                initialApiUrl += '&quality=' + savedQuality;
+                console.log('Using saved quality for initial load:', savedQuality);
+            }
+            
+            fetch(initialApiUrl)
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Network error: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (data.error) {
+                        showError('Error loading video: ' + data.error);
+                        return;
+                    }
+                    
+                    currentVideoUrl = data.url;
+                    console.log('Initial video URL:', currentVideoUrl);
+                    
+                    // Detect available qualities from the URL
+                    detectAvailableQualities(currentVideoUrl);
+                    
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                    
+                    // Make sure error overlay is hidden for fresh load
+                    if (errorOverlay) {
+                        errorOverlay.style.display = 'none';
+                    }
+                    
+                    // Initialize based on browser support
+                    if (Hls.isSupported()) {
+                        console.log('Using HLS.js');
+                        var hls = new Hls({
+                            maxBufferLength: 30,
+                            maxBufferSize: 30 * 1000 * 1000
+                        });
+                        window.hls = hls; // Store reference globally
+                        
+                        hls.on(Hls.Events.ERROR, function(event, data) {
+                            if (data.fatal) {
+                                console.error('HLS Error:', data);
+                                switch(data.type) {
+                                    case Hls.ErrorTypes.NETWORK_ERROR:
+                                        showError('Network error: Check your connection.');
+                                        hls.startLoad();
+                                        break;
+                                    case Hls.ErrorTypes.MEDIA_ERROR:
+                                        showError('Media error: Video cannot be played.');
+                                        hls.recoverMediaError();
+                                        break;
+                                    default:
+                                        showError('Error loading video.');
+                                        hls.destroy();
+                                        break;
+                                }
+                            } else {
+                                // Non-fatal errors shouldn't show error overlay
+                                console.warn('Non-fatal HLS error:', data);
+                            }
+                        });
+                        
+                        hls.loadSource(currentVideoUrl);
+                        hls.attachMedia(video);
+                        
+                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            console.log('HLS manifest parsed');
+                            initializePlayer();
+                        });
+                    } 
+                    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        console.log('Using native HLS');
+                        video.src = currentVideoUrl;
+                        initializePlayer();
+                    } 
+                    else {
+                        showError('Your browser does not support HLS video.');
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Video loading error:', error);
+                    showError('Error loading video: ' + error.message);
+                    
+                    if (loadingIndicator) {
+                        loadingIndicator.style.display = 'none';
+                    }
+                });
+            
+            // Retry button
+            document.getElementById('retry-button').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Token refresh
+            var TOKEN_REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutes
+            setInterval(function() {
+                if (video && !video.paused && !video.ended) {
+                    refreshToken();
+                }
+            }, TOKEN_REFRESH_INTERVAL);
+            
+            function refreshToken() {
+                fetch('/api/refresh-token/' + videoId)
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) {
+                        console.log('Token refreshed');
+                    })
+                    .catch(function(error) {
+                        console.error('Token refresh error:', error);
+                        if (window.showWarning) {
+                            window.showWarning('Session expired. Please reload.');
+                        }
+                    });
+            }
+        } catch (e) {
+            console.error('Player initialization error:', e);
+            showError('Error initializing player: ' + e.message);
+        }
+    });
+</script>
+{% endblock %} 

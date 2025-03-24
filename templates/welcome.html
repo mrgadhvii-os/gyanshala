@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to GyanShala{% endblock %}
+
+{% block additional_head %}
+<style>
+    .welcome-container {
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .welcome-logo {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 2rem;
+    }
+    .welcome-title {
+        font-size: 3rem;
+        color: #3498db;
+        margin-bottom: 1rem;
+        animation: fadeIn 1s ease-in-out;
+    }
+    .welcome-subtitle {
+        font-size: 1.5rem;
+        color: #7f8c8d;
+        animation: fadeIn 1.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Name input modal styles */
+    .name-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    
+    .name-modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .name-modal h2 {
+        color: #3498db;
+        margin-bottom: 20px;
+    }
+    
+    .name-modal p {
+        margin-bottom: 25px;
+        color: #555;
+    }
+    
+    .name-input {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        transition: border-color 0.3s;
+    }
+    
+    .name-input:focus {
+        border-color: #3498db;
+        outline: none;
+    }
+    
+    .submit-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .submit-btn:hover {
+        background-color: #2980b9;
+    }
+    
+    .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: -15px;
+        margin-bottom: 15px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-container">
+    <div class="welcome-logo">
+        <i class="fas fa-book-open fa-6x text-primary"></i>
+    </div>
+    <h1 class="welcome-title">Welcome to GyanShala</h1>
+    <p class="welcome-subtitle">Your journey to success begins here</p>
+    <div class="spinner-border text-primary mt-4" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<!-- Name Input Modal -->
+<div id="nameModal" class="name-modal" style="display: none;">
+    <div class="name-modal-content">
+        <h2>Welcome to GyanShala!</h2>
+        <p>Please tell us your name to personalize your learning experience.</p>
+        <form id="nameForm">
+            <input type="text" id="userName" class="name-input" placeholder="Your name" required>
+            <div id="nameError" class="error-message">Please enter a valid name (at least 2 characters)</div>
+            <button type="submit" class="submit-btn">Start Learning</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDn8eyUYZu3-drqgVfGgzkRVXG0A6rznIY",
+            authDomain: "studyx1.firebaseapp.com",
+            databaseURL: "https://studyx1-default-rtdb.firebaseio.com",
+            projectId: "studyx1",
+            storageBucket: "studyx1.firebasestorage.app",
+            messagingSenderId: "301629772935",
+            appId: "1:301629772935:web:8eb8ae331aff319e809422",
+            measurementId: "G-R503GET1DC"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Check for existing user name in cookie
+        const userName = Cookies.get('user_name');
+        
+        if (!userName) {
+            // Show the name modal if no name cookie exists
+            document.getElementById('nameModal').style.display = 'flex';
+            
+            // Handle name form submission
+            document.getElementById('nameForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const nameInput = document.getElementById('userName');
+                const name = nameInput.value.trim();
+                const errorElement = document.getElementById('nameError');
+                
+                // Validate name
+                if (name.length < 2) {
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // Hide error message if previously shown
+                errorElement.style.display = 'none';
+                
+                // Save name to cookies (valid for 1 year)
+                Cookies.set('user_name', name, { expires: 365, path: '/' });
+                
+                // Generate a unique ID for the user if not already set
+                let userId = Cookies.get('user_id');
+                if (!userId) {
+                    userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    Cookies.set('user_id', userId, { expires: 365, path: '/' });
+                }
+                
+                // Save to Firebase
+                const userRef = database.ref('users/' + userId);
+                userRef.set({
+                    name: name,
+                    lastLogin: new Date().toISOString(),
+                    platform: navigator.platform,
+                    browser: navigator.userAgent
+                })
+                .then(() => {
+                    console.log('User data saved successfully');
+                    
+                    // Hide the modal
+                    document.getElementById('nameModal').style.display = 'none';
+                    
+                    // Add personalized welcome message
+                    document.querySelector('.welcome-subtitle').textContent = 
+                        `Welcome, ${name}! Your journey to success begins here`;
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(function() {
+                        window.location.href = "{{ url_for('batches') }}";
+                    }, 2000);
+                })
+                .catch((error) => {
+                    console.error('Error saving user data:', error);
+                    
+                    // Still proceed even if Firebase save fails
+                    document.getElementById('nameModal').style.display = 'none';
+                    
+                    // Redirect after 2 seconds
+                    setTimeout(function() {
+                        window.location.href = "{{ url_for('batches') }}";
+                    }, 2000);
+                });
+            });
+        } else {
+            // If we already have the name, personalize and redirect
+            document.querySelector('.welcome-subtitle').textContent = 
+                `Welcome back, ${userName}! Your journey continues...`;
+            
+            // Update last login in Firebase if we have a userId
+            const userId = Cookies.get('user_id');
+            if (userId) {
+                const userRef = database.ref('users/' + userId);
+                userRef.update({
+                    lastLogin: new Date().toISOString()
+                }).catch(err => console.error('Error updating last login:', err));
+            }
+            
+            // Redirect after 2 seconds
+            setTimeout(function() {
+                window.location.href = "{{ url_for('batches') }}";
+            }, 2000);
+        }
+    });
+</script>
+{% endblock %} 
