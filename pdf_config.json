@@ -1,6 +1,6 @@
 {
     "default": {
-        "dl": false
+        "dl": true
     },
     "pdfs": [
         {
