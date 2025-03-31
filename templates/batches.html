@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+<!-- {% extends 'base.html' %}
 
 {% block title %}Available Batches - GyanShala{% endblock %}
 
@@ -137,4 +137,463 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}  -->  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MrGadhvii - Site Currently Down</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --secondary: #3112e6;
+            --dark: #151823;
+            --light: #f8f9fa;
+            --bg-gradient: linear-gradient(135deg, #4a6cf7 0%, #10c79f 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            padding: 0 15px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .error-container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .error-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-gradient);
+            clip-path: circle(60% at 90% 10%);
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--primary);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .error-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-code {
+            font-size: 120px;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 20px;
+            background: red;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            opacity: 0.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        .error-message {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-preview {
+            max-width: 300px;
+            margin-bottom: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transform: perspective(1000px) rotateY(10deg);
+            transition: transform 0.5s ease;
+        }
+
+        .app-preview:hover {
+            transform: perspective(1000px) rotateY(0deg);
+        }
+
+        .download-btn {
+            background: var(--bg-gradient);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(74, 108, 247, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(74, 108, 247, 0.4);
+        }
+
+        .app-features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature {
+            flex: 1;
+            min-width: 250px;
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--bg-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .countdown {
+            margin: 30px 0;
+            font-size: 18px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .timer {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .timer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: var(--bg-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .timer-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+        }
+
+        .notification-icon {
+            background: var(--bg-gradient);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .notification-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .show-notification {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 80px;
+            }
+            
+            .error-title {
+                font-size: 32px;
+            }
+            
+            .timer {
+                gap: 10px;
+            }
+            
+            .timer-value {
+                font-size: 24px;
+            }
+            
+            .error-container {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="notification-text">Site is being upgraded! Download the app now.</div>
+    </div>
+
+    <div class="container">
+        <div class="error-container">
+            <div class="error-background"></div>
+            <div class="logo">Mr<span>Gadhvii</span></div>
+            <div class="error-code">503</div>
+            <h1 class="error-title">Site Currently Down</h1>
+            <p class="error-message">We're currently updating our website to serve you better. In the meantime, download our app to access all features and continue using MrGadhvii without interruption.</p>
+            
+            <div class="countdown">
+                <p>Estimated time until website is back:</p>
+                <div class="timer">
+                    <div class="timer-item">
+                        <div class="timer-value" id="days">60</div>
+                        <div class="timer-label">Days</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-value" id="hours">18</div>
+                        <div class="timer-label">Hours</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-value" id="minutes">45</div>
+                        <div class="timer-label">Minutes</div>
+                    </div>
+                    <div class="timer-item">
+                        <div class="timer-value" id="seconds">22</div>
+                        <div class="timer-label">Seconds</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-container">
+                <a href="mysite.com/mrgadhvii.apk" class="download-btn pulse">
+                    <i class="fas fa-download"></i> Download App Now
+                </a>
+                <p>Don't miss out! Get instant access to all features.</p>
+            </div>
+        </div>
+
+        <div class="app-features">
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="feature-title">Faster Experience</h3>
+                <p class="feature-desc">Enjoy lightning-fast performance with our native app, even with slow internet connections.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3 class="feature-title">Instant Notifications</h3>
+                <p class="feature-desc">Stay updated with real-time alerts and never miss important updates.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="feature-title">Enhanced Security</h3>
+                <p class="feature-desc">Your data is protected with advanced encryption and security features.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show notification after 3 seconds
+        setTimeout(() => {
+            document.getElementById('notification').classList.add('show-notification');
+        }, 3000);
+
+        // Hide notification after 10 seconds
+        setTimeout(() => {
+            document.getElementById('notification').classList.remove('show-notification');
+        }, 13000);
+
+        // Countdown timer
+        const countDownDate = new Date();
+        countDownDate.setDate(countDownDate.getDate() + 60);
+        countDownDate.setHours(countDownDate.getHours() + 18);
+        countDownDate.setMinutes(countDownDate.getMinutes() + 45);
+        countDownDate.setSeconds(countDownDate.getSeconds() + 22);
+
+        const timer = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+            
+            if (distance < 0) {
+                clearInterval(timer);
+                document.getElementById("days").innerHTML = "00";
+                document.getElementById("hours").innerHTML = "00";
+                document.getElementById("minutes").innerHTML = "00";
+                document.getElementById("seconds").innerHTML = "00";
+            }
+        }, 1000);
+
+        // Add urgency with random users downloading
+        setInterval(() => {
+            const notification = document.getElementById('notification');
+            const names = [
+  "Aarav", "Khushi", "Raj", "Riya", "Dev", "Mira", "Harsh", "Pooja", "Yash", "Jiya",
+  "Vivaan", "Avni", "Parth", "Nidhi", "Dhruv", "Sneha", "Kunal", "Anaya", "Rohan", "Hetal",
+  "Samar", "Neha", "Tanish", "Grishma", "Arjun", "Kavya", "Manan", "Vrunda", "Reyansh", "Isha",
+  "Darshan", "Hiral", "Shaan", "Trisha", "Mitul", "Tanvi", "Jeet", "Simran", "Vatsal", "Dhwani"
+];
+
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            
+            notification.querySelector('.notification-text').textContent = `${randomName} just downloaded the app!`;
+            notification.classList.add('show-notification');
+            
+            setTimeout(() => {
+                notification.classList.remove('show-notification');
+            }, 3000);
+        }, 20000);
+    </script>
+</body>
+</html>
